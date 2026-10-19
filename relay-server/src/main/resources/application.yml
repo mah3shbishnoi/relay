@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/relay}
+    username: ${SPRING_DATASOURCE_USERNAME:relay}
+    password: ${SPRING_DATASOURCE_PASSWORD:relay}
+    hikari:
+      maximum-pool-size: 20
+  flyway:
+    enabled: true
+
+# All tuning knobs in one place (project doc, section 23).
+# Benchmarks vary these; defaults stay here.
+relay:
+  lease-seconds: 30
+  heartbeat-interval-seconds: 10
+  max-attempts: 5
+  backoff-base-seconds: 2
+  backoff-cap-seconds: 300
+  claim-batch-size: 10
+  reaper-interval-seconds: 5
+  reaper-batch-size: 100
+  max-payload-bytes: 262144
+  max-queue-depth: 100000
+  worker-poll-interval-ms: 500
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    tags:
+      application: relay

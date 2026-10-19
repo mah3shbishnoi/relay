@@ -1,0 +1,33 @@
+docs
+test
+.github
+
+
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IntelliJ / VS Code / Eclipse
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env and secrets
+.env
+*.pem
+*.key
+
+# Logs
+*.log
+logs/

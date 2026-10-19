@@ -1,0 +1,61 @@
+# Local everything: PostgreSQL, the Relay API server, Prometheus, Grafana.
+# Goal: `docker compose up` and the project runs (definition of done, doc section 17).
+#
+# The dev credentials below are for local use only. For any public
+# deployment, override them via environment (see README "Deployment").
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: relay
+      POSTGRES_USER: relay
+      POSTGRES_PASSWORD: relay
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U relay -d relay"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  relay-server:
+    build:
+      context: .
+      dockerfile: relay-server/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/relay
+      SPRING_DATASOURCE_USERNAME: relay
+      SPRING_DATASOURCE_PASSWORD: relay
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - relay-server
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:
+  grafana-data:
