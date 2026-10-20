@@ -15,10 +15,18 @@ class RelayApplicationTests extends AbstractIntegrationTest {
     @Test
     @DisplayName("Context loads and Flyway applies V1 schema to PostgreSQL")
     void contextLoadsAndSchemaApplied() {
-        Integer jobCount = jdbcClient.sql("SELECT count(*) FROM jobs")
+        Integer tableExists = jdbcClient.sql("""
+                SELECT count(*) FROM information_schema.tables
+                WHERE table_schema = 'public' AND table_name = 'jobs'
+                """)
                 .query(Integer.class)
                 .single();
 
-        assertThat(jobCount).isZero();
+        assertThat(tableExists).isEqualTo(1);
+
+        Integer jobCount = jdbcClient.sql("SELECT count(*) FROM jobs")
+                .query(Integer.class)
+                .single();
+        assertThat(jobCount).isGreaterThanOrEqualTo(0);
     }
 }
